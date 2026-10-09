@@ -1,0 +1,1885 @@
+<!doctype html><html><head><meta charset='utf-8'><title>DSA Pseudocode and Code</title><style>
+:root { --bg:#f6f4ef; --fg:#1d1d1b; --muted:#6b675e; --rule:#d9d4c7; --accent:#1f5c5a; --code-bg:#ebe7dd; color-scheme: light; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#151614; --fg:#ecebe6; --muted:#9b978c; --rule:#33322d; --accent:#7fc2bd; --code-bg:#1f1f1c; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg:#151614; --fg:#ecebe6; --muted:#9b978c; --rule:#33322d; --accent:#7fc2bd; --code-bg:#1f1f1c; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--fg); font-family:"IBM Plex Sans", system-ui, sans-serif; font-size:15px; line-height:1.5; padding-inline:16px; }
+.wrap { max-width:46rem; margin:0 auto; padding-block:40px 80px; }
+h1 { font-family:"Source Serif 4", Georgia, serif; font-size:2rem; margin:0 0 6px; font-weight:600; }
+.sub { color:var(--muted); margin:0 0 24px; font-size:0.9rem; }
+article { padding:20px 0; border-top:2px solid var(--fg); }
+h2 { font-family:"Source Serif 4", Georgia, serif; font-size:1.2rem; font-weight:600; margin:0 0 10px; }
+.num { font-family:"IBM Plex Mono", ui-monospace, monospace; color:var(--accent); margin-right:6px; font-size:0.85rem; }
+.label { font-size:0.72rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); margin:12px 0 4px; font-weight:500; }
+pre { background:var(--code-bg); color:var(--fg); font-family:"IBM Plex Mono", ui-monospace, monospace; font-size:0.8rem; line-height:1.5; padding:12px 14px; margin:0; overflow-x:auto; border-radius:4px; max-width:100%; }
+.console { margin-top:10px; border:1px solid var(--rule); border-radius:4px; overflow:hidden; }
+.console .bar { display:flex; gap:8px; flex-wrap:wrap; padding:8px; border-bottom:1px solid var(--rule); }
+.console button { font:inherit; font-size:0.85rem; padding:6px 12px; border:1px solid var(--rule); background:var(--bg); color:var(--fg); border-radius:4px; cursor:pointer; }
+.console button:disabled { opacity:0.45; cursor:default; }
+.console button:focus-visible, .console input:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.console .out { margin:0; border-radius:0; min-height:4rem; max-height:20rem; overflow:auto; white-space:pre-wrap; }
+.console .inrow { display:flex; border-top:1px solid var(--rule); }
+.console .inrow input { flex:1; min-width:0; font-family:"IBM Plex Mono", ui-monospace, monospace; font-size:0.85rem; padding:8px 10px; border:0; background:var(--bg); color:var(--fg); }
+.console .inrow button { border:0; border-left:1px solid var(--rule); border-radius:0; }
+.copy { font:inherit; font-size:0.75rem; padding:3px 10px; margin-left:8px; border:1px solid var(--rule); background:var(--bg); color:var(--fg); border-radius:4px; cursor:pointer; text-transform:none; letter-spacing:0; }
+.copy:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+footer { margin-top:40px; color:var(--muted); font-size:0.85rem; border-top:1px solid var(--rule); padding-top:12px; }
+</style></head><body><div class='wrap'>
+<h1>DSA Lab: Pseudocode and Code</h1>
+<p class="sub">25 questions. Each shows pseudocode and the C program, with copy buttons.</p>
+<article><h2><span class="num">Q1</span>Q1Counting Sort for non-negative integers</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p1">Copy</button></div><pre id="p1">read n
+for i = 1 to n: read a[i]
+  if a[i] < 0: print "negative not allowed"; stop
+m = max(a)
+count[0..m] = 0
+for i = 1 to n: count[a[i]] += 1
+for v = 0 to m:
+  repeat count[v] times: print v</pre><div class="label">C code: q01_counting_sort.c <button type="button" class="copy" data-target="c1">Copy</button></div><pre id="c1">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int main() {
+    int n, i, max = 0;
+    printf(&quot;How many numbers: &quot;);
+    scanf(&quot;%d&quot;, &amp;n);
+
+    int *a = malloc(n * sizeof(int));
+    for (i = 0; i &lt; n; i++) {
+        printf(&quot;Enter number %d: &quot;, i + 1);
+        scanf(&quot;%d&quot;, &amp;a[i]);
+        if (a[i] &lt; 0) {
+            printf(&quot;Negative numbers are not allowed\n&quot;);
+            return 1;
+        }
+        if (a[i] &gt; max) max = a[i];
+    }
+
+    int *count = calloc(max + 1, sizeof(int));
+    for (i = 0; i &lt; n; i++)
+        count[a[i]]++;
+
+    printf(&quot;Sorted: &quot;);
+    for (int v = 0; v &lt;= max; v++)
+        for (int k = 0; k &lt; count[v]; k++)
+            printf(&quot;%d &quot;, v);
+    printf(&quot;\n&quot;);
+
+    free(a);
+    free(count);
+    return 0;
+}
+</pre></article>
+<article><h2><span class="num">Q2</span>Q2Merge Sort on strings, counting inversion swaps</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p2">Copy</button></div><pre id="p2">function mergeSort(s, lo, hi):
+  if lo >= hi: return 0
+  mid = (lo + hi) / 2
+  inv  = mergeSort(s, lo, mid)
+  inv += mergeSort(s, mid+1, hi)
+  inv += merge(s, lo, mid, hi)
+  return inv
+
+function merge(s, lo, mid, hi):
+  i = lo; j = mid+1; inv = 0; tmp = []
+  while i <= mid and j <= hi:
+    if strcmp(s[i], s[j]) <= 0: tmp.add(s[i]); i++
+    else: tmp.add(s[j]); j++; inv += (mid - i + 1)
+  copy the rest of both halves into tmp
+  copy tmp back into s[lo..hi]
+  return inv</pre><div class="label">C code: q02_merge_sort_strings.c <button type="button" class="copy" data-target="c2">Copy</button></div><pre id="c2">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+char s[100][50];
+char t[100][50];
+long long inv = 0;
+
+void merge(int lo, int mid, int hi) {
+    int i = lo, j = mid + 1, k = lo;
+    while (i &lt;= mid &amp;&amp; j &lt;= hi) {
+        if (strcmp(s[i], s[j]) &lt;= 0) {
+            strcpy(t[k++], s[i++]);
+        } else {
+            strcpy(t[k++], s[j++]);
+            inv += mid - i + 1;   /* right string jumps over the rest of left half */
+        }
+    }
+    while (i &lt;= mid) strcpy(t[k++], s[i++]);
+    while (j &lt;= hi)  strcpy(t[k++], s[j++]);
+    for (k = lo; k &lt;= hi; k++)
+        strcpy(s[k], t[k]);
+}
+
+void mergeSort(int lo, int hi) {
+    if (lo &gt;= hi) return;
+    int mid = (lo + hi) / 2;
+    mergeSort(lo, mid);
+    mergeSort(mid + 1, hi);
+    merge(lo, mid, hi);
+}
+
+int main() {
+    int n, i;
+    printf(&quot;How many strings: &quot;);
+    scanf(&quot;%d&quot;, &amp;n);
+    for (i = 0; i &lt; n; i++) {
+        printf(&quot;String %d: &quot;, i + 1);
+        scanf(&quot;%49s&quot;, s[i]);
+    }
+
+    mergeSort(0, n - 1);
+
+    printf(&quot;Sorted:\n&quot;);
+    for (i = 0; i &lt; n; i++)
+        printf(&quot;%s\n&quot;, s[i]);
+    printf(&quot;Inversion swaps: %lld\n&quot;, inv);
+    return 0;
+}
+</pre></article>
+<article><h2><span class="num">Q3</span>Q3Quick Sort with Lomuto partition and random pivot</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p3">Copy</button></div><pre id="p3">function quick(a, low, high):
+  if low < high:
+    r = random(low, high)
+    swap a[r], a[high]
+    p = partition(a, low, high)
+    quick(a, low, p-1)
+    quick(a, p+1, high)
+
+function partition(a, low, high):
+  pivot = a[high]; i = low - 1
+  for j = low to high-1:
+    if a[j] <= pivot: i++; swap a[i], a[j]
+  swap a[i+1], a[high]
+  return i+1</pre><div class="label">C code: q03_quick_sort.c <button type="button" class="copy" data-target="c3">Copy</button></div><pre id="c3">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;time.h&gt;
+
+void swap(int *x, int *y) {
+    int t = *x; *x = *y; *y = t;
+}
+
+int partition(int a[], int lo, int hi) {
+    int pivot = a[hi];
+    int i = lo - 1, j;
+    for (j = lo; j &lt; hi; j++) {
+        if (a[j] &lt;= pivot) {
+            i++;
+            swap(&amp;a[i], &amp;a[j]);
+        }
+    }
+    swap(&amp;a[i + 1], &amp;a[hi]);
+    return i + 1;
+}
+
+void quickSort(int a[], int lo, int hi) {
+    if (lo &lt; hi) {
+        int r = lo + rand() % (hi - lo + 1);   /* random pivot */
+        swap(&amp;a[r], &amp;a[hi]);
+        int p = partition(a, lo, hi);
+        quickSort(a, lo, p - 1);
+        quickSort(a, p + 1, hi);
+    }
+}
+
+int main() {
+    int n, i, a[100];
+    srand(time(NULL));
+    printf(&quot;How many numbers: &quot;);
+    scanf(&quot;%d&quot;, &amp;n);
+    for (i = 0; i &lt; n; i++) {
+        printf(&quot;Enter number %d: &quot;, i + 1);
+        scanf(&quot;%d&quot;, &amp;a[i]);
+    }
+
+    quickSort(a, 0, n - 1);
+
+    printf(&quot;Sorted: &quot;);
+    for (i = 0; i &lt; n; i++)
+        printf(&quot;%d &quot;, a[i]);
+    printf(&quot;\n&quot;);
+    return 0;
+}
+</pre></article>
+<article><h2><span class="num">Q4</span>Q4Dynamic array List ADT</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p4">Copy</button></div><pre id="p4">struct List: data[], size, capacity
+
+add(list, x):
+  if size == capacity:
+    capacity = capacity * 2
+    new = allocate(capacity); copy data into new
+    data = new
+  data[size] = x; size++
+
+get(list, i):
+  if i < 0 or i >= size: error "index out of range"
+  return data[i]</pre><div class="label">C code: q04_dynamic_array_list.c <button type="button" class="copy" data-target="c4">Copy</button></div><pre id="c4">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int main() {
+    int size = 0, cap = 2;
+    int *data = malloc(cap * sizeof(int));
+    int ch, x, i;
+
+    while (1) {
+        printf(&quot;\n1 Add  2 Get  3 Print  0 Exit\nChoice: &quot;);
+        scanf(&quot;%d&quot;, &amp;ch);
+        if (ch == 0) break;
+
+        if (ch == 1) {
+            printf(&quot;Value: &quot;);
+            scanf(&quot;%d&quot;, &amp;x);
+            if (size == cap) {
+                cap *= 2;
+                data = realloc(data, cap * sizeof(int));
+                printf(&quot;(capacity grew to %d)\n&quot;, cap);
+            }
+            data[size++] = x;
+        }
+        else if (ch == 2) {
+            printf(&quot;Index: &quot;);
+            scanf(&quot;%d&quot;, &amp;i);
+            if (i &lt; 0 || i &gt;= size) printf(&quot;Index out of range\n&quot;);
+            else printf(&quot;Value: %d\n&quot;, data[i]);
+        }
+        else if (ch == 3) {
+            for (i = 0; i &lt; size; i++) printf(&quot;%d &quot;, data[i]);
+            printf(&quot;\n&quot;);
+        }
+    }
+    free(data);
+    return 0;
+}
+</pre></article>
+<article><h2><span class="num">Q5</span>Q5Linked Stack ADT with exception handling</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p5">Copy</button></div><pre id="p5">push(s, x):
+  node = new Node(x, next = s.head); s.head = node
+
+isEmpty(s): return s.head == NULL
+
+pop(s):
+  if isEmpty(s): error "stack underflow"
+  x = s.head.value; s.head = s.head.next; return x
+
+peek(s):
+  if isEmpty(s): error "stack empty"
+  return s.head.value</pre><div class="label">C code: q05_linked_stack.c <button type="button" class="copy" data-target="c5">Copy</button></div><pre id="c5">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+struct Node {
+    int value;
+    struct Node *next;
+};
+
+struct Node *top = NULL;
+
+int isEmpty() {
+    return top == NULL;
+}
+
+void push(int x) {
+    struct Node *n = malloc(sizeof(struct Node));
+    n-&gt;value = x;
+    n-&gt;next = top;
+    top = n;
+}
+
+int pop(int *x) {
+    if (isEmpty()) return 0;
+    struct Node *t = top;
+    *x = t-&gt;value;
+    top = t-&gt;next;
+    free(t);
+    return 1;
+}
+
+int peek(int *x) {
+    if (isEmpty()) return 0;
+    *x = top-&gt;value;
+    return 1;
+}
+
+int main() {
+    int ch, x;
+    while (1) {
+        printf(&quot;\n1 Push  2 Pop  3 Peek  4 Is empty  0 Exit\nChoice: &quot;);
+        scanf(&quot;%d&quot;, &amp;ch);
+        if (ch == 0) break;
+
+        if (ch == 1) {
+            printf(&quot;Value: &quot;);
+            scanf(&quot;%d&quot;, &amp;x);
+            push(x);
+            printf(&quot;Pushed.\n&quot;);
+        }
+        else if (ch == 2) {
+            if (pop(&amp;x)) printf(&quot;Popped: %d\n&quot;, x);
+            else printf(&quot;Error: stack underflow\n&quot;);
+        }
+        else if (ch == 3) {
+            if (peek(&amp;x)) printf(&quot;Top: %d\n&quot;, x);
+            else printf(&quot;Error: stack is empty\n&quot;);
+        }
+        else if (ch == 4) {
+            printf(isEmpty() ? &quot;Yes, empty\n&quot; : &quot;No, not empty\n&quot;);
+        }
+    }
+    return 0;
+}
+</pre></article>
+<article><h2><span class="num">Q6</span>Q6Circular Queue ADT using an array</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p6">Copy</button></div><pre id="p6">N = 5 (size); q[0..N-1]; front = 0; rear = 0; count = 0
+
+enqueue(x):
+  if count == N: error "queue full"
+  q[rear] = x; rear = (rear + 1) mod N; count++
+
+dequeue():
+  if count == 0: error "queue empty"
+  x = q[front]; front = (front + 1) mod N; count--
+  return x</pre><div class="label">C code: q06_circular_queue.c <button type="button" class="copy" data-target="c6">Copy</button></div><pre id="c6">#include &lt;stdio.h&gt;
+
+#define N 5
+
+int q[N];
+int front = 0, rear = 0, count = 0;
+
+int main() {
+    int ch, x;
+    while (1) {
+        printf(&quot;\n1 Enqueue  2 Dequeue  0 Exit\nChoice: &quot;);
+        scanf(&quot;%d&quot;, &amp;ch);
+        if (ch == 0) break;
+
+        if (ch == 1) {
+            if (count == N) {
+                printf(&quot;Queue is full\n&quot;);
+            } else {
+                printf(&quot;Value: &quot;);
+                scanf(&quot;%d&quot;, &amp;x);
+                q[rear] = x;
+                rear = (rear + 1) % N;
+                count++;
+                printf(&quot;Added.\n&quot;);
+            }
+        }
+        else if (ch == 2) {
+            if (count == 0) {
+                printf(&quot;Queue is empty\n&quot;);
+            } else {
+                printf(&quot;Removed: %d\n&quot;, q[front]);
+                front = (front + 1) % N;
+                count--;
+            }
+        }
+    }
+    return 0;
+}
+</pre></article>
+<article><h2><span class="num">Q7</span>Q7Doubly Linked List operations</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p7">Copy</button></div><pre id="p7">insertFront(x):
+  n = new Node(x); n.next = head
+  if head != NULL: head.prev = n
+  head = n; if tail == NULL: tail = n
+
+deleteValue(x):
+  p = head
+  while p != NULL and p.value != x: p = p.next
+  if p == NULL: return "not found"
+  if p.prev != NULL: p.prev.next = p.next else head = p.next
+  if p.next != NULL: p.next.prev = p.prev else tail = p.prev
+
+reverseDisplay():
+  p = tail
+  while p != NULL: print p.value; p = p.prev</pre><div class="label">C code: q07_doubly_linked_list.c <button type="button" class="copy" data-target="c7">Copy</button></div><pre id="c7">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+struct Node {
+    int value;
+    struct Node *prev, *next;
+};
+
+struct Node *head = NULL, *tail = NULL;
+
+void insertFront(int x) {
+    struct Node *n = malloc(sizeof(struct Node));
+    n-&gt;value = x;
+    n-&gt;prev = NULL;
+    n-&gt;next = head;
+    if (head) head-&gt;prev = n;
+    else tail = n;
+    head = n;
+}
+
+void insertEnd(int x) {
+    struct Node *n = malloc(sizeof(struct Node));
+    n-&gt;value = x;
+    n-&gt;next = NULL;
+    n-&gt;prev = tail;
+    if (tail) tail-&gt;next = n;
+    else head = n;
+    tail = n;
+}
+
+int deleteValue(int x) {
+    struct Node *p = head;
+    while (p &amp;&amp; p-&gt;value != x) p = p-&gt;next;
+    if (!p) return 0;
+
+    if (p-&gt;prev) p-&gt;prev-&gt;next = p-&gt;next;
+    else head = p-&gt;next;
+
+    if (p-&gt;next) p-&gt;next-&gt;prev = p-&gt;prev;
+    else tail = p-&gt;prev;
+
+    free(p);
+    return 1;
+}
+
+int main() {
+    int ch, x;
+    struct Node *p;
+    while (1) {
+        printf(&quot;\n1 Insert front  2 Insert end  3 Delete value\n&quot;);
+        printf(&quot;4 Show forward   5 Show reverse   0 Exit\nChoice: &quot;);
+        scanf(&quot;%d&quot;, &amp;ch);
+        if (ch == 0) break;
+
+        if (ch == 1) {
+            printf(&quot;Value: &quot;);
+            scanf(&quot;%d&quot;, &amp;x);
+            insertFront(x);
+        }
+        else if (ch == 2) {
+            printf(&quot;Value: &quot;);
+            scanf(&quot;%d&quot;, &amp;x);
+            insertEnd(x);
+        }
+        else if (ch == 3) {
+            printf(&quot;Value to delete: &quot;);
+            scanf(&quot;%d&quot;, &amp;x);
+            if (!deleteValue(x)) printf(&quot;Not found\n&quot;);
+        }
+        else if (ch == 4) {
+            for (p = head; p; p = p-&gt;next) printf(&quot;%d &quot;, p-&gt;value);
+            printf(&quot;\n&quot;);
+        }
+        else if (ch == 5) {
+            for (p = tail; p; p = p-&gt;prev) printf(&quot;%d &quot;, p-&gt;value);
+            printf(&quot;\n&quot;);
+        }
+    }
+    return 0;
+}
+</pre></article>
+<article><h2><span class="num">Q8</span>Q8Circular Linked List as a round-robin scheduler</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p8">Copy</button></div><pre id="p8">quantum = 3
+cur = head  // circular: tail.next == head
+
+while list not empty:
+  t = min(quantum, cur.remaining)
+  print cur.name, "ran for", t
+  cur.remaining -= t; clock += t
+  if cur.remaining == 0: remove cur from ring
+  else: cur = cur.next</pre><div class="label">C code: q08_round_robin.c <button type="button" class="copy" data-target="c8">Copy</button></div><pre id="c8">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+struct Node {
+    int id, remaining;
+    struct Node *next;
+};
+
+int main() {
+    int n, q, i, clock = 0;
+    struct Node *head = NULL, *tail = NULL, *cur, *p;
+
+    printf(&quot;Number of processes: &quot;);
+    scanf(&quot;%d&quot;, &amp;n);
+    printf(&quot;Time quantum: &quot;);
+    scanf(&quot;%d&quot;, &amp;q);
+
+    for (i = 0; i &lt; n; i++) {
+        p = malloc(sizeof(struct Node));
+        p-&gt;id = i + 1;
+        printf(&quot;Burst time of P%d: &quot;, i + 1);
+        scanf(&quot;%d&quot;, &amp;p-&gt;remaining);
+        if (!head) {
+            head = tail = p;
+        } else {
+            tail-&gt;next = p;
+            tail = p;
+        }
+        p-&gt;next = head;          /* keep the ring closed */
+    }
+
+    cur = head;
+    while (head) {
+        int t = cur-&gt;remaining &lt; q ? cur-&gt;remaining : q;
+        clock += t;
+        cur-&gt;remaining -= t;
+        printf(&quot;P%d ran for %d (time now %d)\n&quot;, cur-&gt;id, t, clock);
+
+        if (cur-&gt;remaining == 0) {
+            if (cur-&gt;next == cur) {          /* last process left */
+                free(cur);
+                head = NULL;
+                break;
+            }
+            p = head;
+            while (p-&gt;next != cur) p = p-&gt;next;   /* find the node before cur */
+            p-&gt;next = cur-&gt;next;
+            if (head == cur) head = cur-&gt;next;
+            if (tail == cur) tail = p;
+            struct Node *done = cur;
+            cur = cur-&gt;next;
+            free(done);
+        } else {
+            cur = cur-&gt;next;
+        }
+    }
+    printf(&quot;All processes finished.\n&quot;);
+    return 0;
+}
+</pre></article>
+<article><h2><span class="num">Q9</span>Q9Infix to Postfix conversion</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p9">Copy</button></div><pre id="p9">for each token t in expression:
+  if t is operand: output t
+  elif t == "(": push t
+  elif t == ")":
+    while top != "(": output pop
+    pop  // remove "("
+  else:  // operator
+    while stack not empty and top != "(" and
+          (prec(top) > prec(t) or
+           (prec(top) == prec(t) and t is not "^")):
+      output pop
+    push t
+while stack not empty: output pop</pre><div class="label">C code: q09_infix_to_postfix.c <button type="button" class="copy" data-target="c9">Copy</button></div><pre id="c9">#include &lt;stdio.h&gt;
+
+char st[100];
+int top = -1;
+
+int prec(char c) {
+    if (c == &#x27;^&#x27;) return 3;
+    if (c == &#x27;*&#x27; || c == &#x27;/&#x27;) return 2;
+    if (c == &#x27;+&#x27; || c == &#x27;-&#x27;) return 1;
+    return 0;
+}
+
+int main() {
+    char e[100], out[100];
+    int i, k = 0;
+
+    printf(&quot;Enter infix expression (no spaces, single-letter or digit operands): &quot;);
+    scanf(&quot;%99s&quot;, e);
+
+    for (i = 0; e[i]; i++) {
+        char c = e[i];
+        if ((c &gt;= &#x27;a&#x27; &amp;&amp; c &lt;= &#x27;z&#x27;) || (c &gt;= &#x27;A&#x27; &amp;&amp; c &lt;= &#x27;Z&#x27;) || (c &gt;= &#x27;0&#x27; &amp;&amp; c &lt;= &#x27;9&#x27;)) {
+            out[k++] = c;
+        }
+        else if (c == &#x27;(&#x27;) {
+            st[++top] = c;
+        }
+        else if (c == &#x27;)&#x27;) {
+            while (top &gt;= 0 &amp;&amp; st[top] != &#x27;(&#x27;) out[k++] = st[top--];
+            top--;   /* remove &#x27;(&#x27; */
+        }
+        else {   /* operator */
+            while (top &gt;= 0 &amp;&amp; st[top] != &#x27;(&#x27; &amp;&amp;
+                   (prec(st[top]) &gt; prec(c) ||
+                    (prec(st[top]) == prec(c) &amp;&amp; c != &#x27;^&#x27;))) {
+                out[k++] = st[top--];
+            }
+            st[++top] = c;
+        }
+    }
+    while (top &gt;= 0) out[k++] = st[top--];
+    out[k] = &#x27;\0&#x27;;
+
+    printf(&quot;Postfix: %s\n&quot;, out);
+    return 0;
+}
+</pre></article>
+<article><h2><span class="num">Q10</span>Q10Balanced Parentheses checker</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p10">Copy</button></div><pre id="p10">for each char c in s:
+  if c is ( [ {: push c
+  elif c is ) ] }:
+    if stack empty or pop() does not match c: return "Not balanced"
+return stack empty ? "Balanced" : "Not balanced"</pre><div class="label">C code: q10_balanced_brackets.c <button type="button" class="copy" data-target="c10">Copy</button></div><pre id="c10">#include &lt;stdio.h&gt;
+
+char st[100];
+int top = -1;
+
+int main() {
+    char s[100];
+    int i;
+
+    printf(&quot;Enter expression (no spaces): &quot;);
+    scanf(&quot;%99s&quot;, s);
+
+    for (i = 0; s[i]; i++) {
+        char c = s[i];
+        if (c == &#x27;(&#x27; || c == &#x27;[&#x27; || c == &#x27;{&#x27;) {
+            st[++top] = c;
+        }
+        else if (c == &#x27;)&#x27; || c == &#x27;]&#x27; || c == &#x27;}&#x27;) {
+            if (top &lt; 0) {
+                printf(&quot;Not balanced\n&quot;);
+                return 0;
+            }
+            char open = st[top--];
+            if ((c == &#x27;)&#x27; &amp;&amp; open != &#x27;(&#x27;) ||
+                (c == &#x27;]&#x27; &amp;&amp; open != &#x27;[&#x27;) ||
+                (c == &#x27;}&#x27; &amp;&amp; open != &#x27;{&#x27;)) {
+                printf(&quot;Not balanced\n&quot;);
+                return 0;
+            }
+        }
+    }
+
+    printf(top == -1 ? &quot;Balanced\n&quot; : &quot;Not balanced\n&quot;);
+    return 0;
+}
+</pre></article>
+<article><h2><span class="num">Q11</span>Q11Ticketing system with FCFS queue</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p11">Copy</button></div><pre id="p11">loop:
+  show menu: 1 new ticket, 2 serve next, 3 show queue, 0 exit
+  1: read id, text; enqueue(ticket)
+  2: if queue empty: print "no tickets" else serve dequeue()
+  3: print all tickets from front to rear</pre><div class="label">C code: q11_ticketing_queue.c <button type="button" class="copy" data-target="c11">Copy</button></div><pre id="c11">#include &lt;stdio.h&gt;
+
+#define MAX 100
+
+struct Ticket {
+    int id;
+    char issue[100];
+};
+
+struct Ticket q[MAX];
+int front = 0, rear = 0;
+
+int main() {
+    int ch, nextId = 1;
+
+    while (1) {
+        printf(&quot;\n1 New ticket  2 Serve next  3 Show queue  0 Exit\nChoice: &quot;);
+        scanf(&quot;%d&quot;, &amp;ch);
+        if (ch == 0) break;
+
+        if (ch == 1) {
+            if (rear == MAX) {
+                printf(&quot;Queue is full\n&quot;);
+                continue;
+            }
+            q[rear].id = nextId++;
+            printf(&quot;Describe the issue: &quot;);
+            scanf(&quot; %99[^\n]&quot;, q[rear].issue);
+            rear++;
+            printf(&quot;Ticket %d added.\n&quot;, q[rear - 1].id);
+        }
+        else if (ch == 2) {
+            if (front == rear) {
+                printf(&quot;No tickets waiting\n&quot;);
+            } else {
+                printf(&quot;Serving ticket %d: %s\n&quot;, q[front].id, q[front].issue);
+                front++;
+            }
+        }
+        else if (ch == 3) {
+            if (front == rear) {
+                printf(&quot;Queue is empty\n&quot;);
+            } else {
+                for (int i = front; i &lt; rear; i++)
+                    printf(&quot;Ticket %d: %s\n&quot;, q[i].id, q[i].issue);
+            }
+        }
+    }
+    return 0;
+}
+</pre></article>
+<article><h2><span class="num">Q12</span>Q12Complete binary tree in an array</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p12">Copy</button></div><pre id="p12">tree[0..n-1] holds values in level order
+
+leftChild(i):  if 2i+1 < n: return 2i+1 else -1
+rightChild(i): if 2i+2 < n: return 2i+2 else -1
+parent(i):     if i == 0: return -1 else return (i-1)/2</pre><div class="label">C code: q12_array_binary_tree.c <button type="button" class="copy" data-target="c12">Copy</button></div><pre id="c12">#include &lt;stdio.h&gt;
+
+int main() {
+    int t[100], n, i, idx;
+
+    printf(&quot;How many nodes: &quot;);
+    scanf(&quot;%d&quot;, &amp;n);
+    for (i = 0; i &lt; n; i++) {
+        printf(&quot;Value at index %d: &quot;, i);
+        scanf(&quot;%d&quot;, &amp;t[i]);
+    }
+
+    printf(&quot;Enter a node index (0 to %d): &quot;, n - 1);
+    scanf(&quot;%d&quot;, &amp;idx);
+    if (idx &lt; 0 || idx &gt;= n) {
+        printf(&quot;Invalid index\n&quot;);
+        return 0;
+    }
+
+    printf(&quot;Node %d has value %d\n&quot;, idx, t[idx]);
+
+    if (idx == 0)
+        printf(&quot;Parent: none (this is the root)\n&quot;);
+    else
+        printf(&quot;Parent index %d, value %d\n&quot;, (idx - 1) / 2, t[(idx - 1) / 2]);
+
+    if (2 * idx + 1 &lt; n)
+        printf(&quot;Left child index %d, value %d\n&quot;, 2 * idx + 1, t[2 * idx + 1]);
+    else
+        printf(&quot;No left child\n&quot;);
+
+    if (2 * idx + 2 &lt; n)
+        printf(&quot;Right child index %d, value %d\n&quot;, 2 * idx + 2, t[2 * idx + 2]);
+    else
+        printf(&quot;No right child\n&quot;);
+
+    return 0;
+}
+</pre></article>
+<article><h2><span class="num">Q13</span>Q13Linked binary tree: iterative Inorder and Level-order</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p13">Copy</button></div><pre id="p13">inorderIter(root):
+  s = empty stack; cur = root
+  while cur != NULL or s not empty:
+    while cur != NULL: push cur; cur = cur.left
+    cur = pop(); print cur.value; cur = cur.right
+
+levelOrder(root):
+  if root == NULL: return
+  q = queue; enqueue root
+  while q not empty:
+    n = dequeue(); print n.value
+    if n.left: enqueue n.left
+    if n.right: enqueue n.right</pre><div class="label">C code: q13_linked_tree_traversals.c <button type="button" class="copy" data-target="c13">Copy</button></div><pre id="c13">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+struct Node {
+    int value;
+    struct Node *left, *right;
+};
+
+/* Values are inserted in BST order, so the tree is linked and easy to build. */
+struct Node *insert(struct Node *root, int x) {
+    if (!root) {
+        root = malloc(sizeof(struct Node));
+        root-&gt;value = x;
+        root-&gt;left = root-&gt;right = NULL;
+        return root;
+    }
+    if (x &lt; root-&gt;value) root-&gt;left = insert(root-&gt;left, x);
+    else                 root-&gt;right = insert(root-&gt;right, x);
+    return root;
+}
+
+/* Iterative inorder: uses an explicit stack instead of recursion */
+void inorderIterative(struct Node *root) {
+    struct Node *stack[100];
+    int top = -1;
+    struct Node *cur = root;
+
+    while (cur || top &gt;= 0) {
+        while (cur) {
+            stack[++top] = cur;
+            cur = cur-&gt;left;
+        }
+        cur = stack[top--];
+        printf(&quot;%d &quot;, cur-&gt;value);
+        cur = cur-&gt;right;
+    }
+    printf(&quot;\n&quot;);
+}
+
+/* Level order: uses an explicit queue */
+void levelOrder(struct Node *root) {
+    if (!root) return;
+    struct Node *queue[100];
+    int f = 0, r = 0;
+    queue[r++] = root;
+
+    while (f &lt; r) {
+        struct Node *n = queue[f++];
+        printf(&quot;%d &quot;, n-&gt;value);
+        if (n-&gt;left)  queue[r++] = n-&gt;left;
+        if (n-&gt;right) queue[r++] = n-&gt;right;
+    }
+    printf(&quot;\n&quot;);
+}
+
+int main() {
+    struct Node *root = NULL;
+    int n, i, x;
+
+    printf(&quot;How many values: &quot;);
+    scanf(&quot;%d&quot;, &amp;n);
+    for (i = 0; i &lt; n; i++) {
+        printf(&quot;Value %d: &quot;, i + 1);
+        scanf(&quot;%d&quot;, &amp;x);
+        root = insert(root, x);
+    }
+
+    printf(&quot;Inorder (iterative): &quot;);
+    inorderIterative(root);
+    printf(&quot;Level order:         &quot;);
+    levelOrder(root);
+    return 0;
+}
+</pre></article>
+<article><h2><span class="num">Q14</span>Q14Merkle Tree: build and verify a root hash</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p14">Copy</button></div><pre id="p14">// hash() is any cryptographic hash, for example SHA-256
+buildRoot(txs):
+  level = [hash(t) for t in txs]
+  while len(level) > 1:
+    if len(level) is odd: level.append(level[last])
+    next = []
+    for i = 0 step 2: next.add(hash(level[i] + level[i+1]))
+    level = next
+  return level[0]
+
+verify(tx, proof, root):   // proof = list of (siblingHash, isLeft)
+  h = hash(tx)
+  for (s, isLeft) in proof:
+    h = isLeft ? hash(s + h) : hash(h + s)
+  return h == root</pre><div class="label">C code: q14_merkle_tree.c <button type="button" class="copy" data-target="c14">Copy</button></div><pre id="c14">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+/*
+ * Demo hash (djb2). It is NOT cryptographic.
+ * If your lab requires SHA-256, replace h() with a SHA-256 function
+ * from your course material or a library. The logic below stays the same.
+ */
+unsigned long long h(const char *s) {
+    unsigned long long x = 5381;
+    while (*s) x = x * 33 + (unsigned char)*s++;
+    return x;
+}
+
+unsigned long long pairHash(unsigned long long a, unsigned long long b) {
+    char buf[64];
+    sprintf(buf, &quot;%llu%llu&quot;, a, b);
+    return h(buf);
+}
+
+/* Build the Merkle root from a list of transactions */
+unsigned long long merkleRoot(char tx[][100], int n) {
+    unsigned long long lv[200], nx[200];
+    int i, cnt = n;
+
+    for (i = 0; i &lt; n; i++)
+        lv[i] = h(tx[i]);
+
+    while (cnt &gt; 1) {
+        if (cnt % 2 == 1) {          /* odd: duplicate the last hash */
+            lv[cnt] = lv[cnt - 1];
+            cnt++;
+        }
+        int m = 0;
+        for (i = 0; i &lt; cnt; i += 2)
+            nx[m++] = pairHash(lv[i], lv[i + 1]);
+        cnt = m;
+        for (i = 0; i &lt; cnt; i++)
+            lv[i] = nx[i];
+    }
+    return lv[0];
+}
+
+int main() {
+    char tx[100][100], copy[100][100], text[100];
+    int n, i, idx;
+
+    printf(&quot;How many transactions: &quot;);
+    scanf(&quot;%d&quot;, &amp;n);
+    for (i = 0; i &lt; n; i++) {
+        printf(&quot;Transaction %d: &quot;, i + 1);
+        scanf(&quot;%99s&quot;, tx[i]);
+    }
+
+    unsigned long long root = merkleRoot(tx, n);
+    printf(&quot;Merkle root: %llu\n&quot;, root);
+
+    /* Verification: change one transaction and see if the root still matches */
+    printf(&quot;Enter the index (1 to %d) of a transaction to check: &quot;, n);
+    scanf(&quot;%d&quot;, &amp;idx);
+    printf(&quot;Enter the transaction value you claim it has: &quot;);
+    scanf(&quot;%99s&quot;, text);
+
+    for (i = 0; i &lt; n; i++) strcpy(copy[i], tx[i]);
+    strcpy(copy[idx - 1], text);
+
+    if (merkleRoot(copy, n) == root)
+        printf(&quot;VALID: the claimed transaction matches the stored root\n&quot;);
+    else
+        printf(&quot;INVALID: the transaction does not match the stored root\n&quot;);
+    return 0;
+}
+</pre></article>
+<article><h2><span class="num">Q15</span>Q15Min-Heap with insert, extractMin, and heapify</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p15">Copy</button></div><pre id="p15">insert(x):
+  a[n] = x; n++; siftUp(n-1)
+
+siftUp(i):
+  while i > 0 and a[parent(i)] > a[i]:
+    swap a[parent(i)], a[i]; i = parent(i)
+
+extractMin():
+  if n == 0: error "heap empty"
+  min = a[0]; a[0] = a[n-1]; n--; siftDown(0); return min
+
+siftDown(i):
+  loop:
+    s = i; l = 2i+1; r = 2i+2
+    if l < n and a[l] < a[s]: s = l
+    if r < n and a[r] < a[s]: s = r
+    if s == i: break
+    swap a[i], a[s]; i = s
+
+heapify():           // build heap from an unsorted array
+  for i = n/2 - 1 down to 0: siftDown(i)</pre><div class="label">C code: q15_min_heap.c <button type="button" class="copy" data-target="c15">Copy</button></div><pre id="c15">#include &lt;stdio.h&gt;
+
+int a[100], n = 0;
+
+void swap(int *x, int *y) {
+    int t = *x; *x = *y; *y = t;
+}
+
+void siftUp(int i) {
+    while (i &gt; 0 &amp;&amp; a[(i - 1) / 2] &gt; a[i]) {
+        swap(&amp;a[(i - 1) / 2], &amp;a[i]);
+        i = (i - 1) / 2;
+    }
+}
+
+void siftDown(int i) {
+    while (1) {
+        int s = i, l = 2 * i + 1, r = 2 * i + 2;
+        if (l &lt; n &amp;&amp; a[l] &lt; a[s]) s = l;
+        if (r &lt; n &amp;&amp; a[r] &lt; a[s]) s = r;
+        if (s == i) break;
+        swap(&amp;a[i], &amp;a[s]);
+        i = s;
+    }
+}
+
+void insert(int x) {
+    a[n++] = x;
+    siftUp(n - 1);
+}
+
+int extractMin(int *m) {
+    if (n == 0) return 0;
+    *m = a[0];
+    a[0] = a[--n];
+    siftDown(0);
+    return 1;
+}
+
+void heapify() {
+    for (int i = n / 2 - 1; i &gt;= 0; i--)
+        siftDown(i);
+}
+
+int main() {
+    int ch, x, i;
+
+    while (1) {
+        printf(&quot;\n1 Insert  2 Extract min  3 Show array\n&quot;);
+        printf(&quot;4 Heapify a new array  0 Exit\nChoice: &quot;);
+        scanf(&quot;%d&quot;, &amp;ch);
+        if (ch == 0) break;
+
+        if (ch == 1) {
+            printf(&quot;Value: &quot;);
+            scanf(&quot;%d&quot;, &amp;x);
+            insert(x);
+        }
+        else if (ch == 2) {
+            if (extractMin(&amp;x)) printf(&quot;Minimum: %d\n&quot;, x);
+            else printf(&quot;Heap is empty\n&quot;);
+        }
+        else if (ch == 3) {
+            for (i = 0; i &lt; n; i++) printf(&quot;%d &quot;, a[i]);
+            printf(&quot;\n&quot;);
+        }
+        else if (ch == 4) {
+            printf(&quot;How many values: &quot;);
+            scanf(&quot;%d&quot;, &amp;n);
+            for (i = 0; i &lt; n; i++) {
+                printf(&quot;Value %d: &quot;, i + 1);
+                scanf(&quot;%d&quot;, &amp;a[i]);
+            }
+            heapify();
+            printf(&quot;Heapified.\n&quot;);
+        }
+    }
+    return 0;
+}
+</pre></article>
+<article><h2><span class="num">Q16</span>Q16Heap Sort in ascending order (in-place)</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p16">Copy</button></div><pre id="p16">heapSort(a, n):
+  for i = n/2 - 1 down to 0: siftDownMax(a, n, i)
+  for end = n-1 down to 1:
+    swap a[0], a[end]
+    siftDownMax(a, end, 0)
+
+siftDownMax(a, size, i):
+  loop:
+    s = i; l = 2i+1; r = 2i+2
+    if l < size and a[l] > a[s]: s = l
+    if r < size and a[r] > a[s]: s = r
+    if s == i: break
+    swap a[i], a[s]; i = s</pre><div class="label">C code: q16_heap_sort.c <button type="button" class="copy" data-target="c16">Copy</button></div><pre id="c16">#include &lt;stdio.h&gt;
+
+/* Keep the largest value at the top of a max-heap of size &#x27;size&#x27; */
+void siftDown(int a[], int size, int i) {
+    while (1) {
+        int s = i, l = 2 * i + 1, r = 2 * i + 2;
+        if (l &lt; size &amp;&amp; a[l] &gt; a[s]) s = l;
+        if (r &lt; size &amp;&amp; a[r] &gt; a[s]) s = r;
+        if (s == i) break;
+        int t = a[i]; a[i] = a[s]; a[s] = t;
+        i = s;
+    }
+}
+
+int main() {
+    int a[100], n, i;
+
+    printf(&quot;How many numbers: &quot;);
+    scanf(&quot;%d&quot;, &amp;n);
+    for (i = 0; i &lt; n; i++) {
+        printf(&quot;Number %d: &quot;, i + 1);
+        scanf(&quot;%d&quot;, &amp;a[i]);
+    }
+
+    /* Step 1: build a max-heap */
+    for (i = n / 2 - 1; i &gt;= 0; i--)
+        siftDown(a, n, i);
+
+    /* Step 2: move the max to the end, shrink the heap, repeat */
+    for (i = n - 1; i &gt; 0; i--) {
+        int t = a[0]; a[0] = a[i]; a[i] = t;
+        siftDown(a, i, 0);
+    }
+
+    printf(&quot;Sorted ascending: &quot;);
+    for (i = 0; i &lt; n; i++) printf(&quot;%d &quot;, a[i]);
+    printf(&quot;\n&quot;);
+    return 0;
+}
+</pre></article>
+<article><h2><span class="num">Q17</span>Q17Hash table with separate chaining</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p17">Copy</button></div><pre id="p17">M = 7; table[0..M-1] = empty lists
+
+hashIdx(k): return k mod M
+
+put(k, v):
+  b = hashIdx(k)
+  for node in table[b]: if node.key == k: node.value = v; return
+  table[b].addHead(k, v)
+
+get(k):
+  for node in table[hashIdx(k)]: if node.key == k: return node.value
+  return "not found"
+
+remove(k):
+  remove the node with key k from table[hashIdx(k)], if present</pre><div class="label">C code: q17_hash_table_chaining.c <button type="button" class="copy" data-target="c17">Copy</button></div><pre id="c17">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+#define M 7   /* number of buckets */
+
+struct Node {
+    int key, value;
+    struct Node *next;
+};
+
+struct Node *table[M];
+
+int hashIndex(int k) {
+    return k % M;
+}
+
+void put(int k, int v) {
+    int b = hashIndex(k);
+    struct Node *p = table[b];
+    while (p) {                      /* update if key already exists */
+        if (p-&gt;key == k) { p-&gt;value = v; return; }
+        p = p-&gt;next;
+    }
+    struct Node *n = malloc(sizeof(struct Node));   /* otherwise add at head */
+    n-&gt;key = k;
+    n-&gt;value = v;
+    n-&gt;next = table[b];
+    table[b] = n;
+}
+
+int get(int k, int *v) {
+    struct Node *p = table[hashIndex(k)];
+    while (p) {
+        if (p-&gt;key == k) { *v = p-&gt;value; return 1; }
+        p = p-&gt;next;
+    }
+    return 0;
+}
+
+int removeKey(int k) {
+    int b = hashIndex(k);
+    struct Node *p = table[b], *prev = NULL;
+    while (p) {
+        if (p-&gt;key == k) {
+            if (prev) prev-&gt;next = p-&gt;next;
+            else      table[b] = p-&gt;next;
+            free(p);
+            return 1;
+        }
+        prev = p;
+        p = p-&gt;next;
+    }
+    return 0;
+}
+
+int main() {
+    int ch, k, v;
+
+    while (1) {
+        printf(&quot;\n1 Insert  2 Search  3 Delete  0 Exit\nChoice: &quot;);
+        scanf(&quot;%d&quot;, &amp;ch);
+        if (ch == 0) break;
+
+        if (ch == 1) {
+            printf(&quot;Key: &quot;);
+            scanf(&quot;%d&quot;, &amp;k);
+            printf(&quot;Value: &quot;);
+            scanf(&quot;%d&quot;, &amp;v);
+            put(k, v);
+            printf(&quot;Stored.\n&quot;);
+        }
+        else if (ch == 2) {
+            printf(&quot;Key: &quot;);
+            scanf(&quot;%d&quot;, &amp;k);
+            if (get(k, &amp;v)) printf(&quot;Found value %d\n&quot;, v);
+            else            printf(&quot;Not found\n&quot;);
+        }
+        else if (ch == 3) {
+            printf(&quot;Key: &quot;);
+            scanf(&quot;%d&quot;, &amp;k);
+            printf(removeKey(k) ? &quot;Deleted\n&quot; : &quot;Not found\n&quot;);
+        }
+    }
+    return 0;
+}
+</pre></article>
+<article><h2><span class="num">Q18</span>Q18Collision and chain length tracker</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p18">Copy</button></div><pre id="p18">collisions = 0; maxChain = 0
+
+bulkInsert(keys):
+  for k in keys:
+    b = hashIdx(k)
+    if table[b] is not empty: collisions++
+    put(k, k)
+    maxChain = max(maxChain, length(table[b]))
+
+print collisions, maxChain</pre><div class="label">C code: q18_collision_tracker.c <button type="button" class="copy" data-target="c18">Copy</button></div><pre id="c18">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+#define M 7   /* number of buckets */
+
+struct Node {
+    int key;
+    struct Node *next;
+};
+
+struct Node *table[M];
+
+int main() {
+    int n, i, k, collisions = 0, maxChain = 0;
+
+    printf(&quot;How many keys to insert: &quot;);
+    scanf(&quot;%d&quot;, &amp;n);
+
+    for (i = 0; i &lt; n; i++) {
+        printf(&quot;Key %d: &quot;, i + 1);
+        scanf(&quot;%d&quot;, &amp;k);
+
+        int b = k % M;
+        int len = 0;
+        struct Node *p = table[b];
+        while (p) { len++; p = p-&gt;next; }
+
+        if (len &gt; 0) collisions++;          /* bucket was already in use */
+
+        struct Node *nn = malloc(sizeof(struct Node));
+        nn-&gt;key = k;
+        nn-&gt;next = table[b];
+        table[b] = nn;
+        len++;
+
+        if (len &gt; maxChain) maxChain = len;
+    }
+
+    printf(&quot;Total collisions: %d\n&quot;, collisions);
+    printf(&quot;Maximum chain length: %d\n&quot;, maxChain);
+    return 0;
+}
+</pre></article>
+<article><h2><span class="num">Q19</span>Q19Skip List with probabilistic levels</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p19">Copy</button></div><pre id="p19">MAXL = 4; head has MAXL next pointers
+
+randomLevel():
+  lv = 1
+  while random() < 0.5 and lv < MAXL: lv++
+  return lv
+
+search(k):
+  x = head
+  for i = MAXL-1 down to 0:
+    while x.next[i] != NULL and x.next[i].key < k: x = x.next[i]
+  x = x.next[0]
+  return (x != NULL and x.key == k)
+
+insert(k):
+  update[0..MAXL-1] = head
+  x = head
+  for i = MAXL-1 down to 0:
+    while x.next[i] != NULL and x.next[i].key < k: x = x.next[i]
+    update[i] = x
+  lv = randomLevel(); n = new Node(k, lv)
+  for i = 0 to lv-1:
+    n.next[i] = update[i].next[i]; update[i].next[i] = n</pre><div class="label">C code: q19_skip_list.c <button type="button" class="copy" data-target="c19">Copy</button></div><pre id="c19">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;time.h&gt;
+
+#define MAXL 4   /* maximum number of levels */
+
+struct Node {
+    int key;
+    struct Node *next[MAXL];
+};
+
+struct Node *head;
+
+int randomLevel() {
+    int lv = 1;
+    while (rand() % 2 == 0 &amp;&amp; lv &lt; MAXL) lv++;   /* coin flip */
+    return lv;
+}
+
+void insert(int k) {
+    struct Node *update[MAXL], *x = head;
+    int i;
+
+    for (i = MAXL - 1; i &gt;= 0; i--) {
+        while (x-&gt;next[i] &amp;&amp; x-&gt;next[i]-&gt;key &lt; k) x = x-&gt;next[i];
+        update[i] = x;
+    }
+
+    int lv = randomLevel();
+    struct Node *n = malloc(sizeof(struct Node));
+    n-&gt;key = k;
+    for (i = 0; i &lt; MAXL; i++) n-&gt;next[i] = NULL;
+
+    for (i = 0; i &lt; lv; i++) {
+        n-&gt;next[i] = update[i]-&gt;next[i];
+        update[i]-&gt;next[i] = n;
+    }
+    printf(&quot;Inserted %d (level %d)\n&quot;, k, lv);
+}
+
+int search(int k) {
+    struct Node *x = head;
+    int i;
+    for (i = MAXL - 1; i &gt;= 0; i--)
+        while (x-&gt;next[i] &amp;&amp; x-&gt;next[i]-&gt;key &lt; k) x = x-&gt;next[i];
+    x = x-&gt;next[0];
+    return x &amp;&amp; x-&gt;key == k;
+}
+
+void showAll() {
+    struct Node *x = head-&gt;next[0];
+    while (x) {
+        printf(&quot;%d &quot;, x-&gt;key);
+        x = x-&gt;next[0];
+    }
+    printf(&quot;\n&quot;);
+}
+
+int main() {
+    int ch, k;
+
+    srand(time(NULL));
+    head = malloc(sizeof(struct Node));
+    head-&gt;key = -1;
+    for (int i = 0; i &lt; MAXL; i++) head-&gt;next[i] = NULL;
+
+    while (1) {
+        printf(&quot;\n1 Insert  2 Search  3 Show all  0 Exit\nChoice: &quot;);
+        scanf(&quot;%d&quot;, &amp;ch);
+        if (ch == 0) break;
+
+        if (ch == 1) {
+            printf(&quot;Key: &quot;);
+            scanf(&quot;%d&quot;, &amp;k);
+            insert(k);
+        }
+        else if (ch == 2) {
+            printf(&quot;Key: &quot;);
+            scanf(&quot;%d&quot;, &amp;k);
+            printf(search(k) ? &quot;Found\n&quot; : &quot;Not found\n&quot;);
+        }
+        else if (ch == 3) {
+            showAll();
+        }
+    }
+    return 0;
+}
+</pre></article>
+<article><h2><span class="num">Q20</span>Q20BST: insert, delete with two children, and LCA</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p20">Copy</button></div><pre id="p20">insert(node, k):
+  if node == NULL: return new Node(k)
+  if k < node.key: node.left = insert(node.left, k)
+  elif k > node.key: node.right = insert(node.right, k)
+  return node
+
+delete(node, k):
+  if node == NULL: return NULL
+  if k < node.key: node.left = delete(node.left, k)
+  elif k > node.key: node.right = delete(node.right, k)
+  else:
+    if node.left == NULL: return node.right
+    if node.right == NULL: return node.left
+    s = minNode(node.right)          // inorder successor
+    node.key = s.key
+    node.right = delete(node.right, s.key)
+  return node
+
+lca(node, a, b):
+  while node != NULL:
+    if a < node.key and b < node.key: node = node.left
+    elif a > node.key and b > node.key: node = node.right
+    else: return node</pre><div class="label">C code: q20_bst_lca.c <button type="button" class="copy" data-target="c20">Copy</button></div><pre id="c20">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+struct Node {
+    int key;
+    struct Node *left, *right;
+};
+
+struct Node *insert(struct Node *n, int k) {
+    if (!n) {
+        n = malloc(sizeof(struct Node));
+        n-&gt;key = k;
+        n-&gt;left = n-&gt;right = NULL;
+        return n;
+    }
+    if (k &lt; n-&gt;key)      n-&gt;left = insert(n-&gt;left, k);
+    else if (k &gt; n-&gt;key) n-&gt;right = insert(n-&gt;right, k);
+    return n;
+}
+
+struct Node *minNode(struct Node *n) {
+    while (n-&gt;left) n = n-&gt;left;
+    return n;
+}
+
+struct Node *delete(struct Node *n, int k) {
+    if (!n) return NULL;
+    if (k &lt; n-&gt;key)      n-&gt;left = delete(n-&gt;left, k);
+    else if (k &gt; n-&gt;key) n-&gt;right = delete(n-&gt;right, k);
+    else {
+        if (!n-&gt;left)  { struct Node *t = n-&gt;right; free(n); return t; }
+        if (!n-&gt;right) { struct Node *t = n-&gt;left;  free(n); return t; }
+        /* two children: copy the inorder successor, then delete it */
+        struct Node *s = minNode(n-&gt;right);
+        n-&gt;key = s-&gt;key;
+        n-&gt;right = delete(n-&gt;right, s-&gt;key);
+    }
+    return n;
+}
+
+struct Node *lca(struct Node *n, int a, int b) {
+    while (n) {
+        if (a &lt; n-&gt;key &amp;&amp; b &lt; n-&gt;key)      n = n-&gt;left;
+        else if (a &gt; n-&gt;key &amp;&amp; b &gt; n-&gt;key) n = n-&gt;right;
+        else return n;   /* the keys split here */
+    }
+    return NULL;
+}
+
+void inorder(struct Node *n) {
+    if (!n) return;
+    inorder(n-&gt;left);
+    printf(&quot;%d &quot;, n-&gt;key);
+    inorder(n-&gt;right);
+}
+
+int main() {
+    struct Node *root = NULL;
+    int ch, k, a, b;
+
+    while (1) {
+        printf(&quot;\n1 Insert  2 Delete  3 Show inorder  4 Find LCA  0 Exit\nChoice: &quot;);
+        scanf(&quot;%d&quot;, &amp;ch);
+        if (ch == 0) break;
+
+        if (ch == 1) {
+            printf(&quot;Key: &quot;);
+            scanf(&quot;%d&quot;, &amp;k);
+            root = insert(root, k);
+        }
+        else if (ch == 2) {
+            printf(&quot;Key to delete: &quot;);
+            scanf(&quot;%d&quot;, &amp;k);
+            root = delete(root, k);
+        }
+        else if (ch == 3) {
+            inorder(root);
+            printf(&quot;\n&quot;);
+        }
+        else if (ch == 4) {
+            printf(&quot;Two keys: &quot;);
+            scanf(&quot;%d %d&quot;, &amp;a, &amp;b);
+            struct Node *x = lca(root, a, b);
+            if (x) printf(&quot;Lowest common ancestor: %d\n&quot;, x-&gt;key);
+            else   printf(&quot;Tree is empty\n&quot;);
+        }
+    }
+    return 0;
+}
+</pre></article>
+<article><h2><span class="num">Q21</span>Q21AVL tree with LL, RR, LR, and RL rotations</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p21">Copy</button></div><pre id="p21">height(n): return n == NULL ? 0 : n.height
+bf(n):     return height(n.left) - height(n.right)
+
+rightRotate(y):
+  x = y.left; t = x.right
+  x.right = y; y.left = t
+  update heights of y then x; return x
+
+leftRotate(x):
+  y = x.right; t = y.left
+  y.left = x; x.right = t
+  update heights of x then y; return y
+
+insert(node, k):   // normal BST insert, then:
+  update node.height = 1 + max(height(left), height(right))
+  b = bf(node)
+  if b > 1 and k < node.left.key:  return rightRotate(node)   // LL
+  if b < -1 and k > node.right.key: return leftRotate(node)   // RR
+  if b > 1 and k > node.left.key:
+    node.left = leftRotate(node.left); return rightRotate(node) // LR
+  if b < -1 and k < node.right.key:
+    node.right = rightRotate(node.right); return leftRotate(node) // RL
+  return node</pre><div class="label">C code: q21_avl_tree.c <button type="button" class="copy" data-target="c21">Copy</button></div><pre id="c21">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+struct Node {
+    int key, height;
+    struct Node *left, *right;
+};
+
+int height(struct Node *n) { return n ? n-&gt;height : 0; }
+
+int max(int a, int b) { return a &gt; b ? a : b; }
+
+void updateHeight(struct Node *n) {
+    n-&gt;height = 1 + max(height(n-&gt;left), height(n-&gt;right));
+}
+
+int balance(struct Node *n) {
+    return height(n-&gt;left) - height(n-&gt;right);
+}
+
+/* Right rotation: fixes the Left-Left case */
+struct Node *rightRotate(struct Node *y) {
+    struct Node *x = y-&gt;left, *t = x-&gt;right;
+    x-&gt;right = y;
+    y-&gt;left = t;
+    updateHeight(y);
+    updateHeight(x);
+    return x;
+}
+
+/* Left rotation: fixes the Right-Right case */
+struct Node *leftRotate(struct Node *x) {
+    struct Node *y = x-&gt;right, *t = y-&gt;left;
+    y-&gt;left = x;
+    x-&gt;right = t;
+    updateHeight(x);
+    updateHeight(y);
+    return y;
+}
+
+struct Node *insert(struct Node *n, int k) {
+    if (!n) {
+        n = malloc(sizeof(struct Node));
+        n-&gt;key = k;
+        n-&gt;height = 1;
+        n-&gt;left = n-&gt;right = NULL;
+        return n;
+    }
+    if (k &lt; n-&gt;key)      n-&gt;left = insert(n-&gt;left, k);
+    else if (k &gt; n-&gt;key) n-&gt;right = insert(n-&gt;right, k);
+    else return n;   /* duplicate: ignore */
+
+    updateHeight(n);
+    int b = balance(n);
+
+    if (b &gt; 1 &amp;&amp; k &lt; n-&gt;left-&gt;key)                 /* LL */
+        return rightRotate(n);
+    if (b &lt; -1 &amp;&amp; k &gt; n-&gt;right-&gt;key)               /* RR */
+        return leftRotate(n);
+    if (b &gt; 1 &amp;&amp; k &gt; n-&gt;left-&gt;key) {               /* LR */
+        n-&gt;left = leftRotate(n-&gt;left);
+        return rightRotate(n);
+    }
+    if (b &lt; -1 &amp;&amp; k &lt; n-&gt;right-&gt;key) {             /* RL */
+        n-&gt;right = rightRotate(n-&gt;right);
+        return leftRotate(n);
+    }
+    return n;
+}
+
+void inorder(struct Node *n) {
+    if (!n) return;
+    inorder(n-&gt;left);
+    printf(&quot;%d(h=%d) &quot;, n-&gt;key, n-&gt;height);
+    inorder(n-&gt;right);
+}
+
+int main() {
+    struct Node *root = NULL;
+    int n, i, k;
+
+    printf(&quot;How many keys to insert: &quot;);
+    scanf(&quot;%d&quot;, &amp;n);
+    for (i = 0; i &lt; n; i++) {
+        printf(&quot;Key %d: &quot;, i + 1);
+        scanf(&quot;%d&quot;, &amp;k);
+        root = insert(root, k);
+    }
+
+    printf(&quot;AVL tree (inorder, with heights): &quot;);
+    inorder(root);
+    printf(&quot;\nRoot key: %d\n&quot;, root-&gt;key);
+    return 0;
+}
+</pre></article>
+<article><h2><span class="num">Q22</span>Q22Splay tree: move accessed or inserted keys to the root</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p22">Copy</button></div><pre id="p22">splay(root, x):   // repeat until x is the root
+  while x.parent != NULL:
+    p = x.parent; g = p.parent
+    if g == NULL: rotate(x)                              // zig
+    elif (x is left) == (p is left): rotate(p); rotate(x) // zig-zig
+    else: rotate(x); rotate(x)                           // zig-zag
+  return x
+
+insert(k): normal BST insert of k, then splay(k)
+search(k): normal BST search; splay the last node visited</pre><div class="label">C code: q22_splay_tree.c <button type="button" class="copy" data-target="c22">Copy</button></div><pre id="c22">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+struct Node {
+    int key;
+    struct Node *left, *right;
+};
+
+struct Node *rotateRight(struct Node *y) {
+    struct Node *x = y-&gt;left;
+    y-&gt;left = x-&gt;right;
+    x-&gt;right = y;
+    return x;
+}
+
+struct Node *rotateLeft(struct Node *x) {
+    struct Node *y = x-&gt;right;
+    x-&gt;right = y-&gt;left;
+    y-&gt;left = x;
+    return y;
+}
+
+/* Move the node with key k (or the last node visited) to the root */
+struct Node *splay(struct Node *root, int k) {
+    if (!root || root-&gt;key == k) return root;
+
+    if (k &lt; root-&gt;key) {
+        if (!root-&gt;left) return root;
+        if (k &lt; root-&gt;left-&gt;key) {                    /* zig-zig */
+            root-&gt;left-&gt;left = splay(root-&gt;left-&gt;left, k);
+            root = rotateRight(root);
+        } else if (k &gt; root-&gt;left-&gt;key) {             /* zig-zag */
+            root-&gt;left-&gt;right = splay(root-&gt;left-&gt;right, k);
+            if (root-&gt;left-&gt;right) root-&gt;left = rotateLeft(root-&gt;left);
+        }
+        return root-&gt;left ? rotateRight(root) : root;
+    } else {
+        if (!root-&gt;right) return root;
+        if (k &gt; root-&gt;right-&gt;key) {                   /* zig-zig */
+            root-&gt;right-&gt;right = splay(root-&gt;right-&gt;right, k);
+            root = rotateLeft(root);
+        } else if (k &lt; root-&gt;right-&gt;key) {            /* zig-zag */
+            root-&gt;right-&gt;left = splay(root-&gt;right-&gt;left, k);
+            if (root-&gt;right-&gt;left) root-&gt;right = rotateRight(root-&gt;right);
+        }
+        return root-&gt;right ? rotateLeft(root) : root;
+    }
+}
+
+struct Node *insert(struct Node *root, int k) {
+    if (!root) {
+        struct Node *n = malloc(sizeof(struct Node));
+        n-&gt;key = k;
+        n-&gt;left = n-&gt;right = NULL;
+        return n;
+    }
+    root = splay(root, k);
+    if (root-&gt;key == k) return root;   /* already present, now at root */
+
+    struct Node *n = malloc(sizeof(struct Node));
+    n-&gt;key = k;
+    if (k &lt; root-&gt;key) {
+        n-&gt;left = root-&gt;left;
+        n-&gt;right = root;
+        root-&gt;left = NULL;
+    } else {
+        n-&gt;right = root-&gt;right;
+        n-&gt;left = root;
+        root-&gt;right = NULL;
+    }
+    return n;
+}
+
+int search(struct Node **root, int k) {
+    *root = splay(*root, k);
+    return *root &amp;&amp; (*root)-&gt;key == k;
+}
+
+void inorder(struct Node *n) {
+    if (!n) return;
+    inorder(n-&gt;left);
+    printf(&quot;%d &quot;, n-&gt;key);
+    inorder(n-&gt;right);
+}
+
+int main() {
+    struct Node *root = NULL;
+    int ch, k;
+
+    while (1) {
+        printf(&quot;\n1 Insert  2 Search (moves key to root)  3 Show inorder  0 Exit\nChoice: &quot;);
+        scanf(&quot;%d&quot;, &amp;ch);
+        if (ch == 0) break;
+
+        if (ch == 1) {
+            printf(&quot;Key: &quot;);
+            scanf(&quot;%d&quot;, &amp;k);
+            root = insert(root, k);
+            printf(&quot;Inserted. Root is now %d\n&quot;, root-&gt;key);
+        }
+        else if (ch == 2) {
+            printf(&quot;Key: &quot;);
+            scanf(&quot;%d&quot;, &amp;k);
+            if (search(&amp;root, k)) printf(&quot;Found. Root is now %d\n&quot;, root-&gt;key);
+            else                  printf(&quot;Not found. Root is now %d\n&quot;, root ? root-&gt;key : -1);
+        }
+        else if (ch == 3) {
+            inorder(root);
+            printf(&quot;\n&quot;);
+        }
+    }
+    return 0;
+}
+</pre></article>
+<article><h2><span class="num">Q23</span>Q23Breadth-First Search (BFS) with an adjacency list</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p23">Copy</button></div><pre id="p23">addEdge(u, v): adj[u].add(v); adj[v].add(u)   // undirected
+
+bfs(src):
+  visited[0..n-1] = false
+  q = queue; visited[src] = true; enqueue src
+  while q not empty:
+    u = dequeue(); print u
+    for v in adj[u]:
+      if not visited[v]: visited[v] = true; enqueue v</pre><div class="label">C code: q23_bfs.c <button type="button" class="copy" data-target="c23">Copy</button></div><pre id="c23">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+#define MAX 50
+
+struct Edge {
+    int to;
+    struct Edge *next;
+};
+
+struct Edge *adj[MAX];
+int visited[MAX];
+
+void addEdge(int u, int v) {          /* undirected: add both ways */
+    struct Edge *e = malloc(sizeof(struct Edge));
+    e-&gt;to = v; e-&gt;next = adj[u]; adj[u] = e;
+    e = malloc(sizeof(struct Edge));
+    e-&gt;to = u; e-&gt;next = adj[v]; adj[v] = e;
+}
+
+int main() {
+    int n, m, i, u, v, src;
+    int queue[MAX], f = 0, r = 0;
+
+    printf(&quot;Number of vertices (0 to n-1): &quot;);
+    scanf(&quot;%d&quot;, &amp;n);
+    printf(&quot;Number of edges: &quot;);
+    scanf(&quot;%d&quot;, &amp;m);
+
+    printf(&quot;Enter %d edges as &#x27;u v&#x27;:\n&quot;, m);
+    for (i = 0; i &lt; m; i++) {
+        scanf(&quot;%d %d&quot;, &amp;u, &amp;v);
+        addEdge(u, v);
+    }
+
+    printf(&quot;Source vertex: &quot;);
+    scanf(&quot;%d&quot;, &amp;src);
+
+    visited[src] = 1;
+    queue[r++] = src;
+
+    printf(&quot;BFS order: &quot;);
+    while (f &lt; r) {
+        u = queue[f++];
+        printf(&quot;%d &quot;, u);
+        for (struct Edge *e = adj[u]; e; e = e-&gt;next) {
+            if (!visited[e-&gt;to]) {
+                visited[e-&gt;to] = 1;
+                queue[r++] = e-&gt;to;
+            }
+        }
+    }
+    printf(&quot;\n&quot;);
+    return 0;
+}
+</pre></article>
+<article><h2><span class="num">Q24</span>Q24DFS to count and list connected components</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p24">Copy</button></div><pre id="p24">dfs(u):
+  visited[u] = true; print u
+  for v in adj[u]:
+    if not visited[v]: dfs(v)
+
+countComponents():
+  visited[0..n-1] = false; count = 0
+  for u = 0 to n-1:
+    if not visited[u]:
+      count++; print "Component", count, ":"
+      dfs(u); print newline
+  return count</pre><div class="label">C code: q24_dfs_components.c <button type="button" class="copy" data-target="c24">Copy</button></div><pre id="c24">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+#define MAX 50
+
+struct Edge {
+    int to;
+    struct Edge *next;
+};
+
+struct Edge *adj[MAX];
+int visited[MAX];
+int n;
+
+void addEdge(int u, int v) {          /* undirected: add both ways */
+    struct Edge *e = malloc(sizeof(struct Edge));
+    e-&gt;to = v; e-&gt;next = adj[u]; adj[u] = e;
+    e = malloc(sizeof(struct Edge));
+    e-&gt;to = u; e-&gt;next = adj[v]; adj[v] = e;
+}
+
+void dfs(int u) {
+    visited[u] = 1;
+    printf(&quot;%d &quot;, u);
+    for (struct Edge *e = adj[u]; e; e = e-&gt;next)
+        if (!visited[e-&gt;to])
+            dfs(e-&gt;to);
+}
+
+int main() {
+    int m, i, u, v, count = 0;
+
+    printf(&quot;Number of vertices (0 to n-1): &quot;);
+    scanf(&quot;%d&quot;, &amp;n);
+    printf(&quot;Number of edges: &quot;);
+    scanf(&quot;%d&quot;, &amp;m);
+
+    printf(&quot;Enter %d edges as &#x27;u v&#x27;:\n&quot;, m);
+    for (i = 0; i &lt; m; i++) {
+        scanf(&quot;%d %d&quot;, &amp;u, &amp;v);
+        addEdge(u, v);
+    }
+
+    for (u = 0; u &lt; n; u++) {
+        if (!visited[u]) {
+            count++;
+            printf(&quot;Component %d: &quot;, count);
+            dfs(u);
+            printf(&quot;\n&quot;);
+        }
+    }
+    printf(&quot;Total connected components: %d\n&quot;, count);
+    return 0;
+}
+</pre></article>
+<article><h2><span class="num">Q25</span>Q25Cycle detection in a directed graph with DFS</h2><div class="label">Pseudocode <button type="button" class="copy" data-target="p25">Copy</button></div><pre id="p25">hasCycleDFS(u):
+  visited[u] = true; onStack[u] = true
+  for v in adj[u]:               // directed edges u -> v
+    if onStack[v]: return true   // back edge
+    if not visited[v] and hasCycleDFS(v): return true
+  onStack[u] = false
+  return false
+
+detectCycle():
+  visited[], onStack[] = false
+  for u = 0 to n-1:
+    if not visited[u] and hasCycleDFS(u): return "Cycle found"
+  return "No cycle"</pre><div class="label">C code: q25_directed_cycle.c <button type="button" class="copy" data-target="c25">Copy</button></div><pre id="c25">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+#define MAX 50
+
+struct Edge {
+    int to;
+    struct Edge *next;
+};
+
+struct Edge *adj[MAX];
+int visited[MAX];
+int onStack[MAX];   /* vertices on the current DFS path */
+int n;
+
+void addEdge(int u, int v) {          /* directed: u -&gt; v only */
+    struct Edge *e = malloc(sizeof(struct Edge));
+    e-&gt;to = v; e-&gt;next = adj[u]; adj[u] = e;
+}
+
+int hasCycle(int u) {
+    visited[u] = 1;
+    onStack[u] = 1;
+    for (struct Edge *e = adj[u]; e; e = e-&gt;next) {
+        if (onStack[e-&gt;to]) return 1;                 /* back edge: cycle */
+        if (!visited[e-&gt;to] &amp;&amp; hasCycle(e-&gt;to)) return 1;
+    }
+    onStack[u] = 0;   /* leaving this vertex */
+    return 0;
+}
+
+int main() {
+    int m, i, u, v;
+
+    printf(&quot;Number of vertices (0 to n-1): &quot;);
+    scanf(&quot;%d&quot;, &amp;n);
+    printf(&quot;Number of directed edges: &quot;);
+    scanf(&quot;%d&quot;, &amp;m);
+
+    printf(&quot;Enter %d edges as &#x27;from to&#x27;:\n&quot;, m);
+    for (i = 0; i &lt; m; i++) {
+        scanf(&quot;%d %d&quot;, &amp;u, &amp;v);
+        addEdge(u, v);
+    }
+
+    int found = 0;
+    for (u = 0; u &lt; n &amp;&amp; !found; u++)
+        if (!visited[u] &amp;&amp; hasCycle(u))
+            found = 1;
+
+    printf(found ? &quot;Cycle detected\n&quot; : &quot;No cycle\n&quot;);
+    return 0;
+}
+</pre></article>
+<footer>Copy a block and compile it as C.</footer></div>
+<script>
+
+document.querySelectorAll('.copy').forEach(function (b) {
+  b.addEventListener('click', function () {
+    var el = document.getElementById(b.dataset.target);
+    var text = el.textContent;
+    var done = function () { b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy'; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function () { fallback(el, b); });
+    } else { fallback(el, b); }
+  });
+});
+function fallback(el, b) {
+  var r = document.createRange(); r.selectNodeContents(el);
+  var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+  try { document.execCommand('copy'); b.textContent = 'Copied'; } catch (e) { b.textContent = 'Press Ctrl+C'; }
+  setTimeout(function () { b.textContent = 'Copy'; }, 1500);
+}
+
+</script></body></html>
